@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Híbrido: Java REST vs Python SOAP</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        
+        .container { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        
+        /* Cajas Principales */
+        .box { flex: 1; min-width: 400px; max-width: 600px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* Estilos Java (Verde Spring) */
+        .java-box { border-top: 6px solid #6db33f; }
+        .java-title { color: #6db33f; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        /* Estilos Python (Azul/Amarillo) */
+        .python-box { border-top: 6px solid #3776ab; }
+        .python-title { color: #3776ab; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+
+        /* Formularios */
+        .form-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
+        .form-section h4 { margin-top: 0; color: #555; }
+        
+        input { width: calc(100% - 20px); padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; display: block; }
+        
+        /* Botones Generales */
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { flex: 1; padding: 10px; cursor: pointer; border: none; border-radius: 5px; color: white; font-weight: bold; transition: 0.2s; }
+        
+        /* Colores Botones Java */
+        .btn-j-create { background-color: #2e7d32; }
+        .btn-j-read { background-color: #0288d1; }
+        .btn-j-update { background-color: #f57f17; }
+        .btn-j-delete { background-color: #c62828; }
+
+        /* Colores Botones Python */
+        .btn-p-create { background-color: #3776ab; }
+        .btn-p-read { background-color: #ffd343; color: black; }
+        .btn-p-update { background-color: #ff9800; }
+        .btn-p-delete { background-color: #d32f2f; }
+
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Áreas de respuesta */
+        .response-area { background: #212121; color: #00e676; padding: 15px; border-radius: 6px; min-height: 120px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 13px; white-space: pre-wrap; }
+        .response-area.python { color: #ffd343; }
+    </style>
+</head>
+<body>
+
+    <h1>Portal Universitario (Java REST & Python SOAP)</h1>
+
+    <div class="container">
+
+        <div class="box java-box">
+            <h2 class="java-title">☕ API REST (Java Spring)</h2>
+            <p><strong>Recurso:</strong> Cursos | <strong>Puerto:</strong> 8080</p>
+
+            <div class="form-section">
+                <h4>Datos del Curso</h4>
+                <input type="text" id="j-nombre" placeholder="Nombre del Curso">
+                <input type="date" id="j-fecha">
+                <input type="number" id="j-creditos" placeholder="Créditos">
+                <button class="btn-j-create" onclick="javaRegistrar()">💾 Registrar (POST)</button>
+            </div>
+
+            <div class="form-section">
+                <h4>Gestión por Nombre</h4>
+                <input type="text" id="j-search" placeholder="Nombre a Buscar / Editar / Borrar">
+                <div class="btn-group">
+                    <button class="btn-j-read" onclick="javaBuscar()">🔍 Buscar</button>
+                    <button class="btn-j-update" onclick="javaEditar()">✏️ Editar</button>
+                    <button class="btn-j-delete" onclick="javaEliminar()">🗑️ Borrar</button>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-j-read" style="background:#455a64" onclick="javaListarTodos()">📜 Listar Todos</button>
+                <button class="btn-j-delete" style="background:#37474f" onclick="javaEliminarTodos()">⚠️ Borrar Todo</button>
+            </div>
+
+            <h3>Respuesta JSON:</h3>
+            <pre id="java-response" class="response-area">Esperando conexión a localhost:8080...</pre>
+        </div>
+
+        <div class="box python-box">
+            <h2 class="python-title">🐍 API SOAP (Python Spyne)</h2>
+            <p><strong>Recurso:</strong> Alumnos | <strong>Puerto:</strong> 8000</p>
+
+            <div class="form-section">
+                <h4>Datos del Alumno</h4>
+                <input type="text" id="p-matricula" placeholder="Matrícula (ID)">
+                <input type="text" id="p-nombre" placeholder="Nombre Completo">
+                <input type="text" id="p-carrera" placeholder="Carrera">
+                <button class="btn-p-create" onclick="pyRegistrar()">💾 Registrar</button>
+            </div>
+
+            <div class="form-section">
+                <h4>Gestión por Matrícula</h4>
+                <input type="text" id="p-search" placeholder="Matrícula a Buscar / Editar / Borrar">
+                <div class="btn-group">
+                    <button class="btn-p-read" onclick="pyBuscarUno()">🔍 Buscar</button>
+                    <button class="btn-p-update" onclick="pyEditar()">✏️ Editar</button>
+                    <button class="btn-p-delete" onclick="pyEliminarUno()">🗑️ Borrar</button>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-p-read" style="background:#5c6bc0; color:white;" onclick="pyBuscarTodos()">📜 Listar Todos</button>
+                <button class="btn-p-delete" style="background:#3949ab" onclick="pyEliminarTodos()">⚠️ Borrar Todo</button>
+            </div>
+
+            <h3>Respuesta SOAP:</h3>
+            <pre id="python-response" class="response-area python">Esperando conexión a localhost:8000...</pre>
+        </div>
+
+    </div>
+
+    <script>
+        // ==========================================
+        //  LÓGICA JAVA REST (Spring Boot) - Puerto 8080
+        // ==========================================
+        const URL_JAVA = 'http://localhost:8080/api/cursos';
+
+        // 1. REGISTRAR (POST)
+        async function javaRegistrar() {
+            const data = {
+                nombre: document.getElementById('j-nombre').value,
+                fechaInicio: document.getElementById('j-fecha').value,
+                creditos: document.getElementById('j-creditos').value
+            };
+            try {
+                const res = await fetch(URL_JAVA, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const json = await res.json();
+                document.getElementById('java-response').innerText = JSON.stringify(json, null, 2);
+            } catch (e) { document.getElementById('java-response').innerText = "Error Java: " + e; }
+        }
+
+        // 2. BUSCAR UNO (GET)
+        async function javaBuscar() {
+            const nombre = document.getElementById('j-search').value;
+            try {
+                const res = await fetch(`${URL_JAVA}/buscar?nombre=${nombre}`);
+                if(!res.ok) throw await res.text();
+                const json = await res.json();
+                document.getElementById('java-response').innerText = JSON.stringify(json, null, 2);
+            } catch (e) { document.getElementById('java-response').innerText = "Respuesta: " + e; }
+        }
+
+        // 3. EDITAR (PUT)
+        async function javaEditar() {
+            const nombreViejo = document.getElementById('j-search').value;
+            const data = {
+                nombre: document.getElementById('j-nombre').value,
+                fechaInicio: document.getElementById('j-fecha').value,
+                creditos: document.getElementById('j-creditos').value
+            };
+            try {
+                const res = await fetch(`${URL_JAVA}/editar?buscar=${nombreViejo}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const text = await res.text();
+                document.getElementById('java-response').innerText = text;
+            } catch (e) { document.getElementById('java-response').innerText = "Error Java: " + e; }
+        }
+
+        // 4. ELIMINAR UNO (DELETE)
+        async function javaEliminar() {
+            const nombre = document.getElementById('j-search').value;
+            try {
+                const res = await fetch(`${URL_JAVA}/eliminar?nombre=${nombre}`, { method: 'DELETE' });
+                const text = await res.text();
+                document.getElementById('java-response').innerText = text;
+            } catch (e) { document.getElementById('java-response').innerText = "Error Java: " + e; }
+        }
+
+        // 5. LISTAR TODOS (GET)
+        async function javaListarTodos() {
+            try {
+                const res = await fetch(`${URL_JAVA}/todos`);
+                const json = await res.json();
+                document.getElementById('java-response').innerText = JSON.stringify(json, null, 2);
+            } catch (e) { document.getElementById('java-response').innerText = "Error Java: " + e; }
+        }
+
+        // 6. ELIMINAR TODOS (DELETE)
+        async function javaEliminarTodos() {
+            if(!confirm("¿Seguro de borrar TODOS los cursos en Java?")) return;
+            try {
+                const res = await fetch(`${URL_JAVA}/eliminar-todos`, { method: 'DELETE' });
+                const text = await res.text();
+                document.getElementById('java-response').innerText = text;
+            } catch (e) { document.getElementById('java-response').innerText = "Error Java: " + e; }
+        }
+
+        // ==========================================
+        //  LÓGICA PYTHON SOAP (Spyne) - Puerto 8000
+        // ==========================================
+        const URL_PYTHON = 'http://localhost:8000';
+
+        async function sendSoap(action, bodyXML) {
+            const envelope = `<?xml version="1.0" encoding="UTF-8"?>
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="uav.soap">
+            <soapenv:Header/>
+            <soapenv:Body>${bodyXML}</soapenv:Body>
+            </soapenv:Envelope>`;
+
+            try {
+                const res = await fetch(URL_PYTHON, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/xml; charset=utf-8',
+                        'SOAPAction': action
+                    },
+                    body: envelope
+                });
+
+                const text = await res.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, "text/xml");
+
+                // Intentar extraer lista de strings
+                const strings = xmlDoc.getElementsByTagName("string");
+                if (strings && strings.length > 0) {
+                    let out = '';
+                    for (let i = 0; i < strings.length; i++) {
+                        out += '• ' + strings[i].textContent.trim() + '\n';
+                    }
+                    document.getElementById('python-response').innerText = out.trim();
+                    return;
+                }
+
+                // Intentar extraer resultado único (termina en Result)
+                const body = xmlDoc.getElementsByTagNameNS('*','Body')[0] || xmlDoc.querySelector('Body');
+                if (body) {
+                    // Buscar texto dentro del body recursivamente
+                    function findText(node) {
+                        if (!node) return null;
+                        if (node.childNodes && node.childNodes.length === 1 && node.childNodes[0].nodeType === Node.TEXT_NODE) {
+                            const v = node.textContent.trim();
+                            if (v) return v;
+                        }
+                        if (node.localName && node.localName.toLowerCase().endsWith('result')) {
+                            const v = node.textContent.trim();
+                            if (v) return v;
+                        }
+                        for (let i = 0; i < node.childNodes.length; i++) {
+                            const val = findText(node.childNodes[i]);
+                            if (val) return val;
+                        }
+                        return null;
+                    }
+                    const found = findText(body);
+                    if (found) {
+                        document.getElementById('python-response').innerText = found;
+                        return;
+                    }
+                }
+
+                document.getElementById('python-response').innerText = (text || 'Respuesta vacía').trim();
+
+            } catch (e) {
+                document.getElementById('python-response').innerText = "Error Python: " + e;
+            }
+        }
+
+        // --- FUNCIONES QUE FALTABAN (ESTO ARREGLA EL ERROR) ---
+
+        function pyRegistrar() {
+            const m = document.getElementById('p-matricula').value;
+            const n = document.getElementById('p-nombre').value;
+            const c = document.getElementById('p-carrera').value;
+            const xml = `<tns:registrar_alumno><tns:matricula>${m}</tns:matricula><tns:nombre>${n}</tns:nombre><tns:carrera>${c}</tns:carrera></tns:registrar_alumno>`;
+            sendSoap('registrar_alumno', xml);
+        }
+
+        function pyBuscarTodos() {
+            const xml = `<tns:buscar_todos/>`;
+            sendSoap('buscar_todos', xml);
+        }
+
+        function pyBuscarUno() {
+            const m = document.getElementById('p-search').value;
+            const xml = `<tns:buscar_uno><tns:matricula>${m}</tns:matricula></tns:buscar_uno>`;
+            sendSoap('buscar_uno', xml);
+        }
+
+        function pyEditar() {
+            const m = document.getElementById('p-search').value; // Usamos el input de búsqueda como ID
+            const n = document.getElementById('p-nombre').value;
+            const c = document.getElementById('p-carrera').value;
+            const xml = `<tns:actualizar_alumno><tns:matricula>${m}</tns:matricula><tns:nuevo_nombre>${n}</tns:nuevo_nombre><tns:nueva_carrera>${c}</tns:nueva_carrera></tns:actualizar_alumno>`;
+            sendSoap('actualizar_alumno', xml);
+        }
+
+        function pyEliminarUno() {
+            const m = document.getElementById('p-search').value;
+            if(!confirm(`¿Eliminar matrícula ${m}?`)) return;
+            const xml = `<tns:eliminar_uno><tns:matricula>${m}</tns:matricula></tns:eliminar_uno>`;
+            sendSoap('eliminar_uno', xml);
+        }
+
+        function pyEliminarTodos() {
+            if(!confirm("¿Borrar TODOS los alumnos?")) return;
+            const xml = `<tns:eliminar_todos/>`;
+            sendSoap('eliminar_todos', xml);
+        }
+
+    </script>
+</body>
+</html>
